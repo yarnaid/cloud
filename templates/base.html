@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+    <title>Word Cloud</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-theme.css') }}" />
+
+    <script src="{{ url_for('static', filename='js/d3/d3.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row-fluid">
+            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                <h1>Word Cloud</h1>
+                <h2>{{ url_for('static', filename='css/bootstrap-theme.css') }}</h2>
+                <script type="text/javascript" src="{{ url_for('static', filename='js/cloud.js') }}"></script>
+                <div>
+                    {{debug_text}}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
