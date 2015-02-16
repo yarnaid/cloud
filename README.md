@@ -1,6 +1,7 @@
 # Cloud
 Simple tag cloud visualiztion app.
-![Screenshot](screen.ng "Basic screenshot")
+
+![Screenshot](./screen.ng "Basic screenshot")
 
 Libraries:
   * Bootstrap
