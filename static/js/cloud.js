@@ -1,8 +1,9 @@
-var width = 960,
+var width = '1200',
 height = 500;
 var root;
 
 var svg = d3.select("body").append("svg")
+// .attr("viewBox", "0 0 1 1");
 .attr("width", width)
 .attr("height", height);
 
@@ -51,6 +52,7 @@ function update() {
       .call(force.drag);
 
 
+
 node.append("circle")
 .attr("class", "node")
       // .attr("cx", function(d) { return d.x; })
@@ -83,7 +85,7 @@ node.append("circle")
   node.append("text")
   .attr("dx", 12)
   .attr("dy", ".35em")
-  .text(function(d) { return d.question });
+  .text(function(d) { return !d.code ? d.question : undefined; });
 
 
   force.on("tick", function() {

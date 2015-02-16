@@ -17,10 +17,9 @@
         <div class="row-fluid">
             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
                 <h1 class="text-center">Word Cloud</h1>
-                {# <h2>{{ url_for('static', filename='css/bootstrap-theme.css') }}</h2> #}
                 <script type="text/javascript" src="{{ url_for('static', filename='js/cloud.js') }}"></script>
-                <div>
-                    {{debug_text}}
+                <div style="width: 400px" id="cloud-container">
+                {# <svg viewBox="0 0 1 1"></svg> #}
                 </div>
             </div>
         </div>
