@@ -1,100 +1,106 @@
-// d3.json('static/data/sample.json', function(error, data){
-  var width = 960,
-  height = 500,
-  root;
+var width = 960,
+height = 500;
+var root;
 
-  var force = d3.layout.force()
-  .size([width, height])
-  .on("tick", tick);
+var svg = d3.select("body").append("svg")
+.attr("width", width)
+.attr("height", height);
 
-  var svg = d3.select("body").append("svg")
-  .attr("width", width)
-  .attr("height", height);
+var force = d3.layout.force()
+.gravity(.05)
+.distance(100)
+.charge(-100)
+.size([width, height]);
 
-  var link = svg.selectAll(".link"),
-  node = svg.selectAll(".node");
+var link = svg.selectAll(".link"),
+node = svg.selectAll(".node");
 
-
-  d3.json("static/data/readme.json", function(json) {
-    root = json;
-    console.log(root);
-    root = random_nodes();
+d3.json("static/data/sample.json", function(json) {
+  root = json;
+    // root = {
+    //   name : 'root',
+    //   children : json
+    // }
     update();
   });
 
 
+function update() {
+  var nodes = flatten(root);
+  var links = d3.layout.tree().links(nodes);
 
-  function update() {
-    var nodes = flatten(root),
-    links = d3.layout.tree().links(nodes);
-
-  // Restart the force layout.
   force
   .nodes(nodes)
   .links(links)
   .start();
 
-  // Update the links…
-  link = link.data(links, function(d) { return d.target.id; });
+  var link = svg.selectAll(".link")
+  .data(links)
+  .enter().append("line")
+  .attr("class", "link");
 
-  // Exit any old links.
-  link.exit().remove();
-
-  // Enter any new links.
-  link.enter().insert("line", ".node")
-  .attr("class", "link")
-  .attr("x1", function(d) { return d.source.x; })
-  .attr("y1", function(d) { return d.source.y; })
-  .attr("x2", function(d) { return d.target.x; })
-  .attr("y2", function(d) { return d.target.y; });
-
-  // Update the nodes…
-  node = node.data(nodes, function(d) { return d.id; }).style("fill", color);
-
-  // Exit any old nodes.
-  node.exit().remove();
-
-  // Enter any new nodes.
-  node.enter().append("circle")
+  var node = svg.selectAll(".node")
+  .data(nodes)
+  .enter().append("g")
   .attr("class", "node")
-  .attr("cx", function(d) { return d.x; })
-  .attr("cy", function(d) { return d.y; })
-  .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
-  .style("fill", color)
-  .on("click", click)
   .call(force.drag);
+
+
+// TODO:add here circles
+node.append("circle")
+      .attr("class", "node")
+      // .attr("cx", function(d) { return d.x; })
+      // .attr("cy", function(d) { return d.y; })
+      .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
+      .style("fill", color)
+      .on("click", click)
+      .call(force.drag);
+
+
+
+  // node.append("image")
+  //     .attr("xlink:href", "https://github.com/favicon.ico")
+  //     .attr("x", -8)
+  //     .attr("y", -8)
+  //     .attr("width", 16)
+  //     .attr("height", 16);
+
+node.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.question });
+
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+
 }
 
-function tick() {
-  link.attr("x1", function(d) { return d.source.x; })
-  .attr("y1", function(d) { return d.source.y; })
-  .attr("x2", function(d) { return d.target.x; })
-  .attr("y2", function(d) { return d.target.y; });
-
-  node.attr("cx", function(d) { return d.x; })
-  .attr("cy", function(d) { return d.y; });
-}
 
 // Color leaf nodes orange, and packages white or blue.
 function color(d) {
   return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
 }
 
-// Toggle children on click.
 function click(d) {
-  if (!d3.event.defaultPrevented) {
-    if (d.children) {
-      d._children = d.children;
-      d.children = null;
-    } else {
-      d.children = d._children;
-      d._children = null;
-    }
-    update();
-  }
+  // if (!d3.event.defaultPrevented) {
+  //   if (d.children) {
+  //     d._children = d.children;
+  //     d.children = null;
+  //   } else {
+  //     d.children = d._children;
+  //     d._children = null;
+  //   }
+  //   update();
+  // }
 }
 
-// Returns a list of all nodes under the root.
 function flatten(root) {
   var nodes = [], i = 0;
 
@@ -105,40 +111,5 @@ function flatten(root) {
   }
 
   recurse(root);
-  return nodes;
-}
-
-
-function random_nodes () {
-  var nodes = [], id = 0;
-  var depth = 0;
-  var max_depth = 5;
-  var level_size = 10;
-
-  function get_nodes(n) {
-    var res = [];
-    for (var i = 0; i < n; ++i) {
-      var new_node = {
-        'id' : ++id,
-        'name' : id.toString(),
-        'size': 1000//Math.random() * 10000
-      };
-      res.push(new_node);
-    }
-    return res;
-  }
-  var root = get_nodes(1)[0];
-
-  function recurse(node) {
-    depth += 1;
-    var curr_nodes = get_nodes(level_size);
-    node.children = curr_nodes;
-    if (depth <= max_depth) {
-      node.children.forEach(recurse);
-    }
-  }
-  recurse(root);
-  nodes = root;
-
   return nodes;
 }
