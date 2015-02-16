@@ -8,21 +8,24 @@ var svg = d3.select("body").append("svg")
 
 var force = d3.layout.force()
 .gravity(.05)
-.distance(100)
+.distance(120)
 .charge(-100)
 .size([width, height]);
+
+var drag = force.drag()
+.on("dragstart", dragstart);
 
 var link = svg.selectAll(".link"),
 node = svg.selectAll(".node");
 
+var div = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
+
 d3.json("static/data/sample.json", function(json) {
   root = json;
-    // root = {
-    //   name : 'root',
-    //   children : json
-    // }
-    update();
-  });
+  update();
+});
 
 
 function update() {
@@ -43,20 +46,32 @@ function update() {
   .data(nodes)
   .enter().append("g")
   .attr("class", "node")
-  .call(force.drag);
-
-
-// TODO:add here circles
-node.append("circle")
-      .attr("class", "node")
-      // .attr("cx", function(d) { return d.x; })
-      // .attr("cy", function(d) { return d.y; })
-      .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
-      .style("fill", color)
-      .on("click", click)
+  .on("dblclick", dblclick)
+      // .call(drag);
       .call(force.drag);
 
 
+node.append("circle")
+.attr("class", "node")
+      // .attr("cx", function(d) { return d.x; })
+      // .attr("cy", function(d) { return d.y; })
+      .attr("r", function(d) { return d.effecif || 4.5; })
+      .style("fill", color)
+      .on("click", click)
+      .call(force.drag)
+      .on("mouseover", function(d) {
+        div.transition()
+        .duration(200)
+        .style("opacity", .9);
+        div .html('Effectif: ' + d.effecif + "<br/>Question: "  + d.question + "</br>Code: " + (d.code || '') + "</br>Repondnts: " + d.repondants + "</br>Total: " + d.total)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+      });
 
   // node.append("image")
   //     .attr("xlink:href", "https://github.com/favicon.ico")
@@ -65,17 +80,17 @@ node.append("circle")
   //     .attr("width", 16)
   //     .attr("height", 16);
 
-node.append("text")
-      .attr("dx", 12)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.question });
+  node.append("text")
+  .attr("dx", 12)
+  .attr("dy", ".35em")
+  .text(function(d) { return d.question });
 
 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+    .attr("y1", function(d) { return d.source.y; })
+    .attr("x2", function(d) { return d.target.x; })
+    .attr("y2", function(d) { return d.target.y; });
 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
@@ -99,6 +114,15 @@ function click(d) {
   //   }
   //   update();
   // }
+}
+
+
+function dblclick(d) {
+  d3.select(this).classed("fixed", d.fixed = false);
+}
+
+function dragstart(d) {
+  d3.select(this).classed("fixed", d.fixed = true);
 }
 
 function flatten(root) {
