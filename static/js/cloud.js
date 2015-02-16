@@ -1,32 +1,144 @@
-var fill = d3.scale.category20();
+// d3.json('static/data/sample.json', function(error, data){
+  var width = 960,
+  height = 500,
+  root;
 
-d3.json('static/data/sample.json', function(error, data){
-  d3.layout.cloud().size([300, 300])
-  .words(data.map(function(d) {
-    return {text: d['text'], size: d['size'] + 20}
-  }))
-  .padding(5)
-  .rotate(function() { return ~~(Math.random() * 2) * 90; })
-  .font("Impact")
-  .fontSize(function(d) { return d.size; })
-  .on("end", draw)
+  var force = d3.layout.force()
+  .size([width, height])
+  .on("tick", tick);
+
+  var svg = d3.select("body").append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+  var link = svg.selectAll(".link"),
+  node = svg.selectAll(".node");
+
+
+  d3.json("static/data/readme.json", function(json) {
+    root = json;
+    console.log(root);
+    root = random_nodes();
+    update();
+  });
+
+
+
+  function update() {
+    var nodes = flatten(root),
+    links = d3.layout.tree().links(nodes);
+
+  // Restart the force layout.
+  force
+  .nodes(nodes)
+  .links(links)
   .start();
-function draw(words) {
-  d3.select("body").append("svg")
-  .attr("width", 300)
-  .attr("height", 300)
-  .append("g")
-  .attr("transform", "translate(150,150)")
-  .selectAll("text")
-  .data(words)
-  .enter().append("text")
-  .style("font-size", function(d) { return d.size + "px"; })
-  .style("font-family", "Impact")
-  .style("fill", function(d, i) { return fill(i); })
-  .attr("text-anchor", "middle")
-  .attr("transform", function(d) {
-    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-  })
-  .text(function(d) { return d.text; });
-};
-});
+
+  // Update the links…
+  link = link.data(links, function(d) { return d.target.id; });
+
+  // Exit any old links.
+  link.exit().remove();
+
+  // Enter any new links.
+  link.enter().insert("line", ".node")
+  .attr("class", "link")
+  .attr("x1", function(d) { return d.source.x; })
+  .attr("y1", function(d) { return d.source.y; })
+  .attr("x2", function(d) { return d.target.x; })
+  .attr("y2", function(d) { return d.target.y; });
+
+  // Update the nodes…
+  node = node.data(nodes, function(d) { return d.id; }).style("fill", color);
+
+  // Exit any old nodes.
+  node.exit().remove();
+
+  // Enter any new nodes.
+  node.enter().append("circle")
+  .attr("class", "node")
+  .attr("cx", function(d) { return d.x; })
+  .attr("cy", function(d) { return d.y; })
+  .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
+  .style("fill", color)
+  .on("click", click)
+  .call(force.drag);
+}
+
+function tick() {
+  link.attr("x1", function(d) { return d.source.x; })
+  .attr("y1", function(d) { return d.source.y; })
+  .attr("x2", function(d) { return d.target.x; })
+  .attr("y2", function(d) { return d.target.y; });
+
+  node.attr("cx", function(d) { return d.x; })
+  .attr("cy", function(d) { return d.y; });
+}
+
+// Color leaf nodes orange, and packages white or blue.
+function color(d) {
+  return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+}
+
+// Toggle children on click.
+function click(d) {
+  if (!d3.event.defaultPrevented) {
+    if (d.children) {
+      d._children = d.children;
+      d.children = null;
+    } else {
+      d.children = d._children;
+      d._children = null;
+    }
+    update();
+  }
+}
+
+// Returns a list of all nodes under the root.
+function flatten(root) {
+  var nodes = [], i = 0;
+
+  function recurse(node) {
+    if (node.children) node.children.forEach(recurse);
+    if (!node.id) node.id = ++i;
+    nodes.push(node);
+  }
+
+  recurse(root);
+  return nodes;
+}
+
+
+function random_nodes () {
+  var nodes = [], id = 0;
+  var depth = 0;
+  var max_depth = 5;
+  var level_size = 10;
+
+  function get_nodes(n) {
+    var res = [];
+    for (var i = 0; i < n; ++i) {
+      var new_node = {
+        'id' : ++id,
+        'name' : id.toString(),
+        'size': 1000//Math.random() * 10000
+      };
+      res.push(new_node);
+    }
+    return res;
+  }
+  var root = get_nodes(1)[0];
+
+  function recurse(node) {
+    depth += 1;
+    var curr_nodes = get_nodes(level_size);
+    node.children = curr_nodes;
+    if (depth <= max_depth) {
+      node.children.forEach(recurse);
+    }
+  }
+  recurse(root);
+  nodes = root;
+
+  return nodes;
+}
