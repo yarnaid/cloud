@@ -25,33 +25,44 @@ function radius (node) {
 
 // Use the pack layout to initialize node positions.
 
-d3.json("static/data/sample.json", function(json) {
-
-  nodes = json['nodes'],
-  clusters = json['clusters'];
-  nodes.forEach(function(n) {n.radius = radius(n);});
-  $.each(clusters, function(k, v){clusters[k].radius = radius(clusters[k])});
-
-  d3.layout.pack()
+var layout_pack = d3.layout.pack()
   .sort(null)
   .size([width, height])
   .children(function(d) { return d.values; })
-  .value(function(d) { return d.radius * d.radius; })
-  .nodes({values: d3.nest()
-    .key(function(d) { return d.question; })
-    .entries(nodes)});
+  .value(function(d) { return d.radius * d.radius; });
 
   var force = d3.layout.force()
-  .nodes(nodes)
+  // .nodes(nodes)
   .size([width, height])
   .gravity(.02)
-  .charge(0)
-  .on("tick", tick)
-  .start();
+  .charge(0);
+  // .on("tick", tick)
+  // .start();
 
   var svg = d3.select("body").append("svg")
   .attr("width", width)
   .attr("height", height);
+
+
+d3.json("static/data/sample.json", function(json) {
+
+  nodes = json['nodes'],
+  clusters = json['clusters'];
+  $.each(clusters, function(k, v){nodes.push(v);});
+  nodes.forEach(function(n) {n.radius = radius(n);});
+
+  layout_pack
+  .nodes({values: d3.nest()
+    .key(function(d) { return d.question; })
+    .entries(nodes)});
+
+  force
+  .nodes(nodes)
+  // .size([width, height])
+  // .gravity(.02)
+  // .charge(0)
+  .on("tick", tick)
+  .start();
 
   var node = svg.selectAll("circle")
   .data(nodes)
