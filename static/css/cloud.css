@@ -1,7 +1,7 @@
 .node {
   cursor: pointer;
-  stroke: #3182bd;
-  stroke-width: 1.5px;
+  /*stroke: #3182bd;*/
+  /*stroke-width: 1.5px;*/
 }
 
 /*.link {
@@ -14,11 +14,19 @@
   stroke: #ccc;
 }
 
+body {
+  background: #DFF2FF;
+}
+
+h1 {
+  color: #660099;
+}
+
 div.tooltip {
   position: absolute;
   text-align: center;
   /*width: 60px;*/
-  height: 5em;
+  height: 6em;
   padding: 2px;
   font: 14px sans-serif;
   background: lightsteelblue;
