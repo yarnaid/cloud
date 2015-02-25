@@ -4,24 +4,64 @@
 <head>
     <title>Dixit Explicit Cloud</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-colorpicker.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cloud.css') }}" />
 
     <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-colorpicker.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/d3/d3.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
 </head>
 <body>
     <div class="container">
         <div class="row-fluid">
-            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <h1 class="text-center">Dixit Explicit Cloud</h1>
                 <script type="text/javascript" src="{{ url_for('static', filename='js/cluster.js') }}"></script>
                 <div style="width: 400px" id="cloud-container">
-                {# <svg viewBox="0 0 1 1"></svg> #}
                 </div>
             </div>
+	    <div class="col-md-3">
+		    <div class="input-group title-color">
+			<input type="text" value="" class="form-control" />
+			<span class="input-group-addon"><i></i></span>
+		    </div>
+		    <div class="input-group code-color">
+			<input type="text" value="" class="form-control" />
+			<span class="input-group-addon"><i></i></span>
+		    </div>
+		    <div class="input-group overcode-color">
+			<input type="text" value="" class="form-control" />
+			<span class="input-group-addon"><i></i></span>
+		    </div>
+		    <div class="input-group background-color">
+			<input type="text" value="" class="form-control" />
+			<span class="input-group-addon"><i></i></span>
+		    </div>
+		    <script>
+			function init_picker(p_class) {
+				var title_picker = $(p_class).colorpicker();
+				title_picker.act = function(event){};
+				title_picker.on('changeColor.colorpicker', function(event) {
+					var c = event.color;
+					c.setAlpha(0.5);
+					c = c.toRGB();
+					title_picker.rgba = function() {return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')'};
+					title_picker.act(event);
+					});
+				return title_picker;
+			}
+			var title_p = init_picker('.title-color');
+            title_p.act = function(event) {$(".circle-text").css('fill', title_p.rgba());};
+			var code_p = init_picker('.code-color');
+            code_p.act = function(event) {$(".code").css('fill', code_p.rgba());};
+			var overcode_p = init_picker('.overcode-color');
+            overcode_p.act = function(event) {$(".overcode").css('fill', overcode_p.rgba());};
+			bg_color = init_picker('.background-color');
+			bg_color.act = function(event) {$('body').css('background', bg_color.rgba())};
+		    </script>
+	    </div>
         </div>
     </div>
 </body>

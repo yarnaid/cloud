@@ -4,6 +4,18 @@
   /*stroke-width: 1.5px;*/
 }
 
+.overcode {
+  fill: rgba(102, 0, 153, 0.5);
+}
+
+.code {
+  fill: rgba(150, 131, 236, 0.5);
+}
+
+circle-text {
+  fill: #660099;
+}
+
 /*.link {
   fill: none;
   stroke: #9ecae1;
