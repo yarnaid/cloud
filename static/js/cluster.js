@@ -97,27 +97,10 @@ function update() {
             .enter()
             .append("g")
             .attr("class", "node")
-            .call(force.drag);
-
-
-
-        node
-            .append("circle")
-            .attr("class", function(d) {
-                var c = d.overcode ? "overcode" : "code";
-                return "node " + c;
-            })
-            .attr("r", function(d) {
-                return d.radius || 4.5;
-            })
-        // .style("fill", function(d) {
-        // return d.overcode ? overcode_color : code_color;
-        // }) //function(d) { return color(d.cluster); })
-        .call(force.drag)
+            .call(force.drag)
             .on("mouseover", function(d) {
                 div.transition()
                     .duration(200)
-                // .attr("transform", "translate("+d3.event.translate+") scale(" + 0.5 + ")");
                 .style("opacity", .9);
                 div.html('Effectif: ' + d.radius + "<br/>Question: " + d.question + "</br>Code: " + (d.code || '') + "</br>Repondents: " + d.repondants + "</br>Total: " + d.total)
                     .style("left", (d3.event.pageX) + "px")
@@ -154,6 +137,22 @@ function update() {
                 });
                 })
             });
+
+
+
+        node
+            .append("circle")
+            .attr("class", function(d) {
+                var c = d.overcode ? "overcode" : "code";
+                return "node " + c;
+            })
+            .attr("r", function(d) {
+                return d.radius || 4.5;
+            })
+        // .style("fill", function(d) {
+        // return d.overcode ? overcode_color : code_color;
+        // }) //function(d) { return color(d.cluster); })
+        ;
 
 
         node.append("text")
