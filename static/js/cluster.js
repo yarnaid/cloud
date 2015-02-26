@@ -2,9 +2,7 @@
 // I'm very sorry for it...
 
 
-var width = 1200,
-    height = 500,
-    padding = 1.5, // separation between same-color nodes
+var padding = 1.5, // separation between same-color nodes
     clusterPadding = 60, // separation between different-color nodes
     maxRadius = 12,
     margin = {
@@ -15,6 +13,12 @@ var width = 1200,
     };
 var w = window.innerWidth,
     h = window.innerHeight;
+
+var cluster_density = 0;
+
+var width = w,
+    height = h;
+
 var collide, cluster, clusters, nodes, node;
 
 var color = d3.scale.category10()
@@ -26,7 +30,7 @@ var div = d3.select("body").append("div")
 
 function radius(node, key) {
     var key = key || "effecif";
-    return node[key] * 2.5;
+    return node[key] * 2.0;
 }
 
 // Use the pack layout to initialize node positions.
@@ -45,19 +49,20 @@ layout_pack = d3.layout.pack()
     });
 force = d3.layout.force()
     .size([width, height])
-    .gravity(.01)
-// .friction(-0.5)
-// .alpha(100)
+    .gravity(.00)
+// .friction(1.0);
+// .alpha(-100);
 .charge(50);
 
 function update() {
     d3.json("static/data/sample.json", function(json) {
         $("body > svg").remove();
-        svg = d3.select("body").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var svg_parent = $("#svg").parent();
+        w = svg_parent.width() - 50;
+        h = Math.max(height, svg_parent.height()) - 100;
+        svg = d3.select("#svg")
+            .attr("width", w + 100)
+            .attr("height", h);
 
 
         nodes = json['nodes'],
@@ -122,6 +127,32 @@ function update() {
                 div.transition()
                     .duration(500)
                     .style("opacity", 0);
+            })
+            .on("click", function(d) {
+                $.post('/ajax_get_answers?id=' + d.code, function(answer) {
+                    a = answer;
+                    bootbox.dialog({
+                        message: '<table id="table-methods-table" data-height="299">' +
+                            '<thead>' +
+                            '<tr>' +
+                            '<th data-field="state" data-checkbox="true"></th>' +
+                            '<th data-field="id">Responder ID</th>' +
+                            '<th data-field="answer">Item Answer</th>' +
+                            '</tr>' +
+                            '</thead>' +
+                            '</table>',
+                        title: d.question,
+                        buttons: {
+                            success: {
+                                label: 'Ok',
+                                className: 'btn-default'
+                            }
+                        }
+                    });
+                    $table = $('#table-methods-table').bootstrapTable({
+                    data: answer.result
+                });
+                })
             });
 
 
@@ -131,11 +162,10 @@ function update() {
             .attr("class", "circle-text")
         // .attr("textLength", function(d) {return d.radius * 2;})
         .text(function(d) {
-            var txt = !d.code ? d.question : undefined;
-            return txt;
+            return d.title;
         })
             .style("font-size", function(d) {
-                return Math.max(10, Math.min(2 * d.radius, (2 * d.radius - 8) / this.getComputedTextLength() * 12)) + "px";
+                return Math.max(6, Math.min(2 * d.radius, (2 * d.radius - 8) / this.getComputedTextLength() * 12)) + "px";
             })
             .style("fill", "black")
             .call(wrap, 50);
@@ -187,7 +217,7 @@ function update() {
                     if (quad.point && (quad.point !== d)) {
                         var x = d.x - quad.point.x,
                             y = d.y - quad.point.y,
-                            l = Math.sqrt(x * x + y * y),
+                            l = Math.sqrt(x * x + y * y) + cluster_density,
                             r = d.radius + quad.point.radius + (d.cluster === quad.point.cluster ? padding : clusterPadding);
                         if (l < r) {
                             l = (l - r) / l * alpha;
@@ -230,30 +260,28 @@ function wrap(text, width) {
 }
 
 function tick(e) {
-    var rnd = function() {
-        return Math.random() * 10;
-    };
     node
         .each(cluster(10 * e.alpha * e.alpha))
         .each(collide(.5))
         .attr("cx", function(d) {
-            if (d.x > w - d.r) d.x -= d.r
-            else if (d.x < d.r) d.x += d.r
+            if (d.x > w - d.r) d.x -= 1
+            else if (d.x < d.r) d.x += 1
             return d.x;
         })
         .attr("cy", function(d) {
-            if (d.y > h - d.r) d.y -= d.r
-            else if (d.y < d.r) d.y += d.r
+            if (d.y > h - d.r) d.y -= 1
+            else if (d.y < d.r) d.y += 1
             return d.y;
         });
 
     node.attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
     })
-    .style("animation-duration", function () {
-    return Math.random() * 10 + "s";
-});
+        .style("animation-duration", function() {
+            return Math.random() * 10 + "s";
+        });
 }
 
-
 update();
+
+// So now you see, that this code is absolute shit

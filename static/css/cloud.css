@@ -34,6 +34,12 @@ h1 {
   color: #660099;
 }
 
+svg {
+  border: 2px solid;
+  border-radius: 25px;
+  background: #DFF2FF;
+}
+
 div.tooltip {
   position: absolute;
   text-align: center;
