@@ -62,7 +62,23 @@ function update() {
         h = Math.max(height, svg_parent.height()) - 100;
         svg = d3.select("#svg")
             .attr("width", w + 100)
-            .attr("height", h);
+            .attr("height", h)
+            .attr("pointer-events", "all")
+            .append('svg:g')
+            .call(d3.behavior.zoom().on("zoom", redraw))
+            .append('svg:g');
+
+        svg
+            .append('svg:rect')
+            .attr('width', w)
+            .attr('height', h)
+            .attr('fill', 'none');
+
+        function redraw() {
+          svg.attr("transform",
+              "translate(" + d3.event.translate + ")"
+              + " scale(" + d3.event.scale + ")");
+        }
 
 
         nodes = json['nodes'],
