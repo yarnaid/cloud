@@ -117,10 +117,11 @@ function update() {
             .on("mouseover", function(d) {
                 div.transition()
                     .duration(200)
-                .style("opacity", .9);
-                div.html('Effectif: ' + d.radius + "<br/>Question: " + d.question + "</br>Code: " + (d.code || '') + "</br>Repondents: " + d.repondants + "</br>Total: " + d.total)
+                .style("opacity", .95);
+                div.html(tooltip_html(d))
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 28) + "px");
+                    // .style("cursor", function () {return !d.overcode ? "pointer" : "default";});
             })
             .on("mouseout", function(d) {
                 div.transition()
@@ -128,6 +129,8 @@ function update() {
                     .style("opacity", 0);
             })
             .on("click", function(d) {
+                if (d.overcode)
+                    return;
                 $.post('/ajax_get_answers?id=' + d.code, function(answer) {
                     a = answer;
                     bootbox.dialog({
@@ -295,6 +298,41 @@ function tick(e) {
         .style("animation-duration", function() {
             return Math.random() * 10 + "s";
         });
+}
+
+function persentage (f) {
+    return (f * 100.0).toFixed(1) + '%';
+}
+
+function tooltip_html(d) {
+    var code_html = '<tr>' +
+                      '<td><strong>Code number:</strong></td>' +
+                      '<td>' + d.code + '</td>' +
+                    '</tr>';
+    var code = d.code? code_html : '';
+    var res = '<table class="table table-striped table-hover table-condensed">' +
+            '<caption class="text-center"><h5><strong>' + d.title + '</strong></h5></caption>' +
+              '<tbody>' +
+                '<tr>' +
+                  '<td><strong>Effectif:</strong></td>' +
+                  '<td>' + d.radius + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td><strong>Code Title:</strong></td>' +
+                  '<td>' + d.question + '</td>' +
+                '</tr>' +
+                code +
+                '<tr>' +
+                  '<td><strong>Repondents:</strong></td>' +
+                  '<td>' +persentage(d.repondants) + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td><strong>Total:</strong></td>' +
+                  '<td>' + persentage(d.total) + '</td>' +
+                '</tr>' +
+              '</tbody>' +
+            '</table>';
+    return res;
 }
 
 update();

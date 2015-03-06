@@ -38,18 +38,29 @@ h1 {
 svg {
   border: 2px solid;
   border-radius: 25px;
-  background: #DFF2FF;
+  /*background: #DFF2FF;*/
 }
 
 div.tooltip {
   position: absolute;
   text-align: center;
   /*width: 60px;*/
-  height: 6em;
+  /*height: 6em;*/
   padding: 2px;
-  font: 14px sans-serif;
+  font-family: 'Open Sans', sans-serif;
+  font: 14px;
   background: lightsteelblue;
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+  opacity: 0.8;
 }
+
+table > caption {
+  color: black;
+}
+
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #C4D3E6;
+ }

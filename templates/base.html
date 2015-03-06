@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <html>
+
 <head>
     <title>Dixit Explicit Cloud</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
@@ -8,14 +9,15 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-table.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cloud.css') }}" />
-
     <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap-colorpicker.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/d3/d3.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootbox.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap-table.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/color.js') }}"></script>
 </head>
+
 <body>
     <div class="container">
         <div class="row-fluid">
@@ -23,70 +25,106 @@
                 <h1 class="text-center">Dixit Explicit Cloud</h1>
                 <script type="text/javascript" src="{{ url_for('static', filename='js/cluster.js') }}"></script>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h3 class="panel-title text-center">Colors</h3></div>
-                    <div class="panel-body">
-                      <div class="input-group title-color">
-                        <span class="input-group-addon">Titles:</span>
-                        <input type="text" value="" class="form-control" />
-                        <span class="input-group-addon"><i></i></span>
+                    <div class="panel-heading">
+                        <a href="#colors-controls" data-toggle="collapse" aria-expanded="false" aria-controls="colors-controls">
+                            <h3 class="panel-title text-center">Colors</h3>
+                        </a>
                     </div>
-                    <div class="input-group code-color">
-                        <span class="input-group-addon">Codes:</span>
-                        <input type="text" value="" class="form-control" />
-                        <span class="input-group-addon"><i></i></span>
+                    <div id="colors-controls" class="panel-body collapse">
+                        <div>
+                            <div class="input-group title-color">
+                                <span class="input-group-addon">Titles:</span>
+                                <input type="text" value="" class="form-control" />
+                                <span class="input-group-addon"><i></i></span>
+                            </div>
+                            <div class="input-group code-color">
+                                <span class="input-group-addon">Codes:</span>
+                                <input type="text" value="" class="form-control" />
+                                <span class="input-group-addon"><i></i></span>
+                            </div>
+                            <div class="input-group overcode-color">
+                                <span class="input-group-addon">Overcodes:</span>
+                                <input type="text" value="" class="form-control" />
+                                <span class="input-group-addon"><i></i></span>
+                            </div>
+                            <div class="input-group background-color">
+                                <span class="input-group-addon">Background:</span>
+                                <input type="text" value="" class="form-control" />
+                                <span class="input-group-addon"><i></i></span>
+                            </div>
+                            <div>
+                                <button id="randomize-colors">Randomize colors</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-group overcode-color">
-                        <span class="input-group-addon">Overcodes:</span>
-                        <input type="text" value="" class="form-control" />
-                        <span class="input-group-addon"><i></i></span>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="#question-controls" data-toggle="collapse" aria-expanded="false" aria-controls="question-controls">
+                            <h3 class="panel-title text-center">Question</h3>
+                        </a>
                     </div>
-                    <div class="input-group background-color">
-                        <span class="input-group-addon">Background:</span>
-                        <input type="text" value="" class="form-control" />
-                        <span class="input-group-addon"><i></i></span>
+                    <div id="question-controls" class="panel-body collapse">
+                        <form role="form">
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="optradio" checked="">Likes</label>
+                            </div>
+                            <div class="radio">
+                            </div>
+                            <div class="radio disabled">
+                                <label style="color:grey;">
+                                    <input type="radio" name="optradio" disabled>Dislikes</label>
+                            </div>
+                        </form>
                     </div>
-                    <form role="form">
-                        <div><h3 class="text-center">Type</h3></div>
-
-                        <div class="radio">
-                          <label><input type="radio" name="optradio" checked="">Likes</label>
-                      </div>
-                      <div class="radio">
-                      </div>
-                      <div class="radio disabled">
-                          <label style="color:grey;"><input type="radio" name="optradio" disabled>Dislikes</label>
-                      </div>
-                  </form>
-              </div>
-          </div>
-          <script>
-
-             function init_picker(p_class) {
-                var title_picker = $(p_class).colorpicker();
-                title_picker.act = function(event){};
-                title_picker.on('changeColor.colorpicker', function(event) {
-                   var c = event.color;
-                   c.setAlpha(0.5);
-                   c = c.toRGB();
-                   title_picker.rgba = function() {return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')'};
-                   title_picker.act(event);
-               });
-                return title_picker;
-            }
-            var title_p = init_picker('.title-color');
-            title_p.act = function(event) {$(".circle-text").css('fill', title_p.rgba());};
-            var code_p = init_picker('.code-color');
-            code_p.act = function(event) {$(".code").css('fill', code_p.rgba());};
-            var overcode_p = init_picker('.overcode-color');
-            overcode_p.act = function(event) {$(".overcode").css('fill', overcode_p.rgba());};
-            bg_color = init_picker('.background-color');
-            bg_color.act = function(event) {$('body').css('background', bg_color.rgba())};
-        </script>
+                </div>
+                <script>
+                function init_picker(p_class) {
+                    var title_picker = $(p_class).colorpicker();
+                    title_picker.act = function(event) {};
+                    title_picker.on('changeColor.colorpicker', function(event) {
+                        var c = event.color;
+                        c.setAlpha(0.5);
+                        c = c.toRGB();
+                        title_picker.rgba = function() {
+                            return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')'
+                        };
+                        title_picker.act(event);
+                    });
+                    return title_picker;
+                }
+                var title_p = init_picker('.title-color');
+                title_p.act = function(event) {
+                    $(".circle-text").css('fill', title_p.rgba());
+                };
+                var code_p = init_picker('.code-color');
+                code_p.act = function(event) {
+                    $(".code").css('fill', code_p.rgba());
+                };
+                var overcode_p = init_picker('.overcode-color');
+                overcode_p.act = function(event) {
+                    $(".overcode").css('fill', overcode_p.rgba());
+                };
+                bg_color = init_picker('.background-color');
+                bg_color.act = function(event) {
+                    $('svg').css('background', bg_color.rgba());
+                };
+                $('#randomize-colors').click(function() {
+                    $(".circle-text").css('fill', getRandomColor());
+                    $(".code").css('fill', getRandomColor());
+                    $(".overcode").css('fill', getRandomColor());
+                    $('svg').css('background', getRandomColor());
+                })
+                </script>
+            </div>
+            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                <svg id="svg"></svg>
+            </div>
+        </div>
     </div>
-        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8"><svg id="svg"></svg></div>
-</div>
-</div>
 </body>
+
 </html>
