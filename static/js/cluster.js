@@ -3,7 +3,7 @@
 
 
 var padding = 1.5, // separation between same-color nodes
-    clusterPadding = 60, // separation between different-color nodes
+    clusterPadding = 20, // separation between different-color nodes
     maxRadius = 12,
     margin = {
         top: 40,
@@ -30,7 +30,7 @@ var div = d3.select("body").append("div")
 
 function radius(node, key) {
     var key = key || "effecif";
-    return node[key] * 2.0;
+    return node[key] * 1.5;
 }
 
 // Use the pack layout to initialize node positions.
@@ -48,11 +48,12 @@ layout_pack = d3.layout.pack()
         return d.radius * d.radius;
     });
 force = d3.layout.force()
-    .size([width, height])
-    .gravity(.00)
-// .friction(1.0);
-// .alpha(-100);
-.charge(50);
+    // .size([width, height])
+    // .gravity(.1)
+    .linkDistance(30)
+    .charge(30);
+
+var link, links = force.links();
 
 function update() {
     d3.json("static/data/sample.json", function(json) {
@@ -92,7 +93,14 @@ function update() {
             if (!n.overcode) {
                 n.overcode = false;
             }
+            var link = {
+                source: n,
+                target: clusters[n.cluster]
+            };
+            links.push(link);
         });
+        link = svg.selectAll('.link').data(links);
+
 
         layout_pack
             .nodes({
@@ -104,7 +112,9 @@ function update() {
             });
 
         force
+            .size([w, h])
             .nodes(nodes)
+            .links(links)
             .on("tick", tick)
             .start();
 
@@ -157,7 +167,9 @@ function update() {
                 })
             });
 
-
+        link.enter()
+            .insert('line', '.node')
+            .attr("class", "link");
 
         node
             .append("circle")
@@ -167,11 +179,7 @@ function update() {
             })
             .attr("r", function(d) {
                 return d.radius || 4.5;
-            })
-        // .style("fill", function(d) {
-        // return d.overcode ? overcode_color : code_color;
-        // }) //function(d) { return color(d.cluster); })
-        ;
+            });
 
 
         node.append("text")
@@ -207,11 +215,10 @@ function update() {
             return function(d) {
                 var cluster = clusters[d.cluster];
                 if (cluster === d) return;
-                var clusters_dist = -20;
                 var x = d.x - cluster.x,
                     y = d.y - cluster.y,
-                    l = Math.sqrt(x * x + y * y) - clusters_dist,
-                    r = d.radius + cluster.radius - clusters_dist;
+                    l = Math.sqrt(x * x + y * y),
+                    r = d.radius + cluster.radius;
                 if (l != r) {
                     l = (l - r) / l * alpha;
                     d.x -= x *= l;
@@ -278,9 +285,14 @@ function wrap(text, width) {
 }
 
 function tick(e) {
+    link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+
     node
         .each(cluster(10 * e.alpha * e.alpha))
-        .each(collide(.5))
+        .each(collide(.05))
         .attr("cx", function(d) {
             if (d.x > w - d.r) d.x -= 1
             else if (d.x < d.r) d.x += 1
