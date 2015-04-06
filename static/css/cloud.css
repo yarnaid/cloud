@@ -38,7 +38,7 @@ h1 {
 svg {
   border: 2px solid;
   border-radius: 25px;
-  /*background: #DFF2FF;*/
+  background: #DFF2FF;
 }
 
 div.tooltip {
