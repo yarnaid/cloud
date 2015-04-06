@@ -30,7 +30,7 @@ var div = d3.select("body").append("div")
 
 function radius(node, key) {
     var key = key || "effecif";
-    return node[key] * 1.5;
+    return node[key] * 2;
 }
 
 var duration = 1000 / 80;
@@ -51,10 +51,10 @@ layout_pack = d3.layout.pack()
     });
 force = d3.layout.force()
 .gravity(0.05)
-.friction(0.3)
+.friction(0.2)
 .linkStrength(10.)
 .linkDistance(function(l) {return radius(l.source) + radius(l.target);})
-    .charge(function(n) {return -1500 / radius(n); });
+    .charge(function(n) {return -30*radius(n); });
 
 var link, links = force.links();
 
