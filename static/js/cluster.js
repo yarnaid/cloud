@@ -50,8 +50,8 @@ layout_pack = d3.layout.pack()
         return d.radius * d.radius;
     });
 force = d3.layout.force()
-.gravity(0.12)
-.friction(0.55)
+.gravity(0.05)
+.friction(0.3)
 .linkStrength(10.)
 .linkDistance(function(l) {return radius(l.source) + radius(l.target);})
     .charge(function(n) {return -1500 / radius(n); });
