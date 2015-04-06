@@ -33,13 +33,15 @@ function radius(node, key) {
     return node[key] * 1.5;
 }
 
+var duration = 1000 / 80;
+
 // Use the pack layout to initialize node positions.
 var svg;
 
 var layout_pack, force;
 
 layout_pack = d3.layout.pack()
-    .sort(null)
+    // .sort(null)
     .size([width, height])
     .children(function(d) {
         return d.values;
@@ -48,10 +50,11 @@ layout_pack = d3.layout.pack()
         return d.radius * d.radius;
     });
 force = d3.layout.force()
-    // .size([width, height])
-    // .gravity(.1)
-    .linkDistance(30)
-    .charge(30);
+.gravity(0.12)
+.friction(0.55)
+.linkStrength(10.)
+.linkDistance(function(l) {return radius(l.source) + radius(l.target);})
+    .charge(function(n) {return -1500 / radius(n); });
 
 var link, links = force.links();
 
@@ -76,9 +79,8 @@ function update() {
             .attr('fill', 'none');
 
         function redraw() {
-          svg.attr("transform",
-              "translate(" + d3.event.translate + ")"
-              + " scale(" + d3.event.scale + ")");
+            svg.attr("transform",
+                "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
         }
 
 
@@ -103,6 +105,7 @@ function update() {
 
 
         layout_pack
+            .size([w, h])
             .nodes({
                 values: d3.nest()
                     .key(function(d) {
@@ -126,12 +129,12 @@ function update() {
             .call(force.drag)
             .on("mouseover", function(d) {
                 div.transition()
-                    .duration(200)
-                .style("opacity", .95);
+                    .duration(duration)
+                    .style("opacity", .95);
                 div.html(tooltip_html(d))
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 28) + "px");
-                    // .style("cursor", function () {return !d.overcode ? "pointer" : "default";});
+                // .style("cursor", function () {return !d.overcode ? "pointer" : "default";});
             })
             .on("mouseout", function(d) {
                 div.transition()
@@ -162,8 +165,8 @@ function update() {
                         }
                     });
                     $table = $('#table-methods-table').bootstrapTable({
-                    data: answer.result
-                });
+                        data: answer.result
+                    });
                 })
             });
 
@@ -195,19 +198,6 @@ function update() {
             })
             .style("fill", "black")
             .call(wrap, 50);
-
-
-        // svg.selectAll(".node")
-        // .transition()
-        // .duration(750)
-        // .delay(function(d, i) { return i * 5; })
-        // .attrTween("r", function(d) {
-        //   var i = d3.interpolate(0, d.radius * 2);
-        //   return function(t) { return d.radius = i(t); };
-        // });
-
-        // svg.selectAll(".node").transition().duration(1000)
-        // .ease("linear");
 
 
         // Move d to be adjacent to the cluster node.
@@ -285,14 +275,24 @@ function wrap(text, width) {
 }
 
 function tick(e) {
-    link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
+    link
+    // .transition().ease('linear').duration(duration)
+        .attr("x1", function(d) {
+        return d.source.x;
+    })
+        .attr("y1", function(d) {
+            return d.source.y;
+        })
+        .attr("x2", function(d) {
+            return d.target.x;
+        })
+        .attr("y2", function(d) {
+            return d.target.y;
+        });
 
     node
-        .each(cluster(10 * e.alpha * e.alpha))
-        .each(collide(.05))
+        // .each(cluster(10 * e.alpha * e.alpha))
+        // .each(collide(.005))
         .attr("cx", function(d) {
             if (d.x > w - d.r) d.x -= 1
             else if (d.x < d.r) d.x += 1
@@ -304,46 +304,52 @@ function tick(e) {
             return d.y;
         });
 
-    node.attr("transform", function(d) {
+    node
+    // .transition().ease('linear').duration(duration)
+    .attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
-    })
-        .style("animation-duration", function() {
-            return Math.random() * 10 + "s";
-        });
+    });
+        // .style("animation-duration", function() {
+        //     return Math.random() * 10 + "s";
+        // });
+    force.stop();
+
+    setTimeout(function() { force.start(); }, duration);
+
 }
 
-function persentage (f) {
+function persentage(f) {
     return (f * 100.0).toFixed(1) + '%';
 }
 
 function tooltip_html(d) {
     var code_html = '<tr>' +
-                      '<td><strong>Code number:</strong></td>' +
-                      '<td>' + d.code + '</td>' +
-                    '</tr>';
-    var code = d.code? code_html : '';
+        '<td><strong>Code number:</strong></td>' +
+        '<td>' + d.code + '</td>' +
+        '</tr>';
+    var code = d.code ? code_html : '';
     var res = '<table class="table table-striped table-hover table-condensed">' +
-            '<caption class="text-center"><h5><strong>' + d.title + '</strong></h5></caption>' +
-              '<tbody>' +
-                '<tr>' +
-                  '<td><strong>Effectif:</strong></td>' +
-                  '<td>' + d.radius + '</td>' +
-                '</tr>' +
-                '<tr>' +
-                  '<td><strong>Code Title:</strong></td>' +
-                  '<td>' + d.question + '</td>' +
-                '</tr>' +
-                code +
-                '<tr>' +
-                  '<td><strong>Repondents:</strong></td>' +
-                  '<td>' +persentage(d.repondants) + '</td>' +
-                '</tr>' +
-                '<tr>' +
-                  '<td><strong>Total:</strong></td>' +
-                  '<td>' + persentage(d.total) + '</td>' +
-                '</tr>' +
-              '</tbody>' +
-            '</table>';
+        '<caption class="text-center"><h5><strong>' + d.title + '</strong></h5></caption>' +
+        '<tbody>' +
+        '<tr>' +
+        '<td><strong>Effectif:</strong></td>' +
+        '<td>' + d.radius + '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td><strong>Code Title:</strong></td>' +
+        '<td>' + d.question + '</td>' +
+        '</tr>' +
+        code +
+        '<tr>' +
+        '<td><strong>Repondents:</strong></td>' +
+        '<td>' + persentage(d.repondants) + '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td><strong>Total:</strong></td>' +
+        '<td>' + persentage(d.total) + '</td>' +
+        '</tr>' +
+        '</tbody>' +
+        '</table>';
     return res;
 }
 
