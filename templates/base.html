@@ -13,9 +13,11 @@
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap-colorpicker.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/d3/d3.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/queue.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootbox.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap-table.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/color.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/cluster2.js') }}"></script>
 </head>
 
 <body>
@@ -23,7 +25,6 @@
         <div class="row-fluid">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <h1 class="text-center">Dixit Explicit Cloud</h1>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/cluster.js') }}"></script>
             </div>
             <div class="col-md-3">
                 <div class="panel panel-default">
@@ -82,6 +83,7 @@
                     </div>
                 </div>
                 <script>
+                // 'use strict';
                 function init_picker(p_class) {
                     var title_picker = $(p_class).colorpicker();
                     title_picker.act = function(event) {};
@@ -120,8 +122,35 @@
                 })
                 </script>
             </div>
-            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                <svg id="svg"></svg>
+            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9" id="svg">
+                <script>
+                'use strict';
+                $(function() {
+                    var data = {};
+
+                    function init() {
+                        var cluster = new Cluster('#svg', data);
+                    };
+
+                    function data_loaded(err, _data) {
+                        if (!err) {
+                            data = _data;
+                            init();
+                        } else {
+                            console.log(err);
+                        }
+                    };
+
+                    var start = function() {
+                        queue()
+                            .defer(d3.json, 'static/data/sample.json')
+                            .await(function(err, sample) {
+                                data_loaded(err, sample);
+                            });
+                    };
+                    start();
+                });
+                </script>
             </div>
         </div>
     </div>

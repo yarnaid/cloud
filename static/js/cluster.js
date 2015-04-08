@@ -50,11 +50,15 @@ layout_pack = d3.layout.pack()
         return d.radius * d.radius;
     });
 force = d3.layout.force()
-.gravity(0.05)
-.friction(0.2)
-.linkStrength(10.)
-.linkDistance(function(l) {return radius(l.source) + radius(l.target);})
-    .charge(function(n) {return -30*radius(n); });
+    .gravity(0.05)
+    .friction(0.2)
+    .linkStrength(10.)
+    .linkDistance(function(l) {
+        return radius(l.source) + radius(l.target);
+    })
+    .charge(function(n) {
+        return -30 * radius(n);
+    });
 
 var link, links = force.links();
 
@@ -85,7 +89,7 @@ function update() {
 
 
         nodes = json['nodes'],
-        clusters = json['clusters'];
+            clusters = json['clusters'];
         $.each(clusters, function(k, v) {
             v.overcode = true;
             nodes.push(v);
@@ -186,13 +190,13 @@ function update() {
 
 
         node.append("text")
-        // .attr("dx", function(d) {return -d.radius;})
-        .attr("dy", ".1em")
+            // .attr("dx", function(d) {return -d.radius;})
+            .attr("dy", ".1em")
             .attr("class", "circle-text")
-        // .attr("textLength", function(d) {return d.radius * 2;})
-        .text(function(d) {
-            return d.title;
-        })
+            // .attr("textLength", function(d) {return d.radius * 2;})
+            .text(function(d) {
+                return d.title;
+            })
             .style("font-size", function(d) {
                 return Math.max(6, Math.min(2 * d.radius, (2 * d.radius - 8) / this.getComputedTextLength() * 12)) + "px";
             })
@@ -278,8 +282,8 @@ function tick(e) {
     link
     // .transition().ease('linear').duration(duration)
         .attr("x1", function(d) {
-        return d.source.x;
-    })
+            return d.source.x;
+        })
         .attr("y1", function(d) {
             return d.source.y;
         })
@@ -291,8 +295,8 @@ function tick(e) {
         });
 
     node
-        // .each(cluster(10 * e.alpha * e.alpha))
-        // .each(collide(.005))
+    // .each(cluster(10 * e.alpha * e.alpha))
+    // .each(collide(.005))
         .attr("cx", function(d) {
             if (d.x > w - d.r) d.x -= 1
             else if (d.x < d.r) d.x += 1
@@ -306,15 +310,17 @@ function tick(e) {
 
     node
     // .transition().ease('linear').duration(duration)
-    .attr("transform", function(d) {
+        .attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
     });
-        // .style("animation-duration", function() {
-        //     return Math.random() * 10 + "s";
-        // });
+    // .style("animation-duration", function() {
+    //     return Math.random() * 10 + "s";
+    // });
     force.stop();
 
-    setTimeout(function() { force.start(); }, duration);
+    setTimeout(function() {
+        force.start();
+    }, duration);
 
 }
 
